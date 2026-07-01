@@ -175,12 +175,13 @@ static void log_string_slice_cases(void)
 
 static void log_cpp_format_cases(void)
 {
+    on9log::Logger log("demo");
     const char *name = "on9log";
-    const char *null_string = NULL;
     const uint8_t pointer_target[] = {0xa5, 0xc0, 0xdb, 0x00};
     const uint8_t *pointer_arg = pointer_target;
     unsigned u32_value = 42u;
     unsigned hex_value = 0xabadu;
+    int signed_value = -42;
     unsigned long long u64_value = 0x1122334455667788ull;
     long long signed_64 = -42ll;
     double pi = 3.141592653589793;
@@ -189,63 +190,40 @@ static void log_cpp_format_cases(void)
     int precision = 3;
     const char *text = "foobar";
 
-    ON9_LOGI(TAG, "cpp default by wire type int={} ptr={} str={} null={}",
-             u32_value, pointer_arg, name, null_string);
-    ON9_LOGI(TAG,
-             "cpp u64 default renders raw bit pattern unsigned: {} (same as {:d}); "
-             "signed_64={} likewise loses sign on host (wire has no signedness)",
-             u64_value, u64_value, signed_64);
-    ON9_LOGI(TAG,
-             "cpp float needs explicit type char: bad_default={} good={:.6f}",
-             pi, pi);
-
-    ON9_LOGI(TAG,
-             "cpp type chars d={:d} x={:x} X={:X} o={:o} b={:b} B={:B} p={:p} s={:s} c={:c}",
+    log.info("cpp defaults int={} ptr={} str={}", u32_value, pointer_arg, name);
+    log.info("cpp signed and unsigned 64-bit values: {} {}", signed_64, u64_value);
+    log.info("cpp float default={} fixed={:.6f}", pi, pi);
+    log.info("cpp type chars d={:d} x={:x} X={:X} o={:o} b={:b} B={:B} p={} s={:s} c={:c}",
              u32_value, hex_value, hex_value, u32_value, u32_value, u32_value,
-             pointer_arg, name, (unsigned)'Z');
-    ON9_LOGI(TAG, "cpp alt form {:#x} {:#o} {:#b}", hex_value, u32_value, u32_value);
+             pointer_arg, name, 'Z');
+    log.info("cpp alt form {:#x} {:#o} {:#b}", hex_value, u32_value, u32_value);
 
-    ON9_LOGI(TAG,
-             "cpp align [{:>10}] [{:<10}] [{:^10}] [{:*>10}] [{:*<10}]",
+    log.info("cpp align [{:>10}] [{:<10}] [{:^10}] [{:*>10}] [{:*<10}]",
              u32_value, name, u32_value, u32_value, name);
-    ON9_LOGI(TAG,
-             "cpp pad_and_sign {:08x} {:#08x} zero_ignored_when_align [{:>08}] sign {:+d} {: d} {:-d}",
-             hex_value, hex_value, u32_value, u32_value, u32_value, u32_value);
+    log.info("cpp pad_and_sign {:08x} {:#08x} [{:>8}] {:+d} {: d}",
+             hex_value, hex_value, u32_value, signed_value, signed_value);
 
-    ON9_LOGI(TAG, "cpp string_precision {:.3s} {:.0s} {:.100s}", text, text, text);
-    ON9_LOGI(TAG,
-             "cpp int_precision {:.4d} {:.4x} {:#.4x} {:+.4d}",
-             u32_value, hex_value, hex_value, u32_value);
-    ON9_LOGI(TAG,
-             "cpp int_precision_zero value0=[{:.0}] value_nonzero=[{:.0}] zero_flag_ignored=[{:08.4d}]",
-             0u, u32_value, u32_value);
+    log.info("cpp string_precision {:.3s} {:.0s} {:.100s}", text, text, text);
+    log.info("cpp integer_width {:04d} {:04x} {:#06x} {:+04d}",
+             u32_value, hex_value, hex_value, signed_value);
 
-    ON9_LOGI(TAG,
-             "cpp floats {:.2f} {:.2F} {:e} {:.2e} default {:f}",
-             pi, pi, pi, pi, pi);
-    ON9_LOGI(TAG,
-             "cpp floats_neg_space {:.1f} {:+.1f} {: .1f} {:+.1f}",
-             neg_pi, pi, pi, neg_pi);
-    ON9_LOGI(TAG, "cpp inf_nan {:f} {:f}", (double)INFINITY, (double)NAN);
+    log.info("cpp floats {:.2f} {:.2F} {:e} {:.2e} default {}", pi, pi, pi, pi, pi);
+    log.info("cpp floats_neg_space {:.1f} {:+.1f} {: .1f} {:+.1f}", neg_pi, pi, pi, neg_pi);
+    log.info("cpp inf_nan {} {}", (double)INFINITY, (double)NAN);
 
-    ON9_LOGI(TAG, "cpp dyn_width_auto [{:{}}] [{:<{}}]", u32_value, width, name, width);
-    ON9_LOGI(TAG, "cpp dyn_precision_auto {:.{}f} {:.{}s}", pi, precision, text, precision);
-    ON9_LOGI(TAG,
-             "cpp dyn_width_precision_auto [{:{}.{}f}] [{:{}.{}}]",
-             pi, width, precision, u32_value, width, precision);
+    log.info("cpp dyn_width_auto [{:{}}] [{:<{}}]", u32_value, width, name, width);
+    log.info("cpp dyn_precision_auto {:.{}f} {:.{}s}", pi, precision, text, precision);
+    log.info("cpp dyn_width_precision_auto [{:{}.{}f}] [{:>{}}]",
+             pi, width, precision, name, width);
 
-    ON9_LOGI(TAG, "cpp positional {0}-{1}-{0}", u32_value, hex_value);
-    ON9_LOGI(TAG, "cpp explicit_w {0:{1}}", u32_value, width);
-    ON9_LOGI(TAG, "cpp explicit_p {0:.{1}f}", pi, precision);
-    ON9_LOGI(TAG, "cpp explicit_reuse {0:{0}}", width);
-
-    ON9_LOGI(TAG, "cpp brace_escapes {{}} and {}", u32_value);
-
-    ON9_LOGI(TAG, "cpp mixed printf dispatches payload={} status=%d so {{}} stays literal", u32_value);
+    log.info("cpp positional {0}-{1}-{0}", u32_value, hex_value);
+    log.info("cpp explicit_w {0:{1}}", u32_value, width);
+    log.info("cpp explicit_p {0:.{1}f}", pi, precision);
+    log.info("cpp explicit_reuse {0:{0}}", width);
+    log.info("cpp brace_escapes {{}} and {}", u32_value);
 
     unsigned complex_id = 0xabu;
-    ON9_LOGI(TAG, "cpp complex [{:>8.2f}] {:s}={:#06x}", pi, name, complex_id);
-    ON9_LOGI(TAG, "cpp mixed C and C++ %f {:f}", pi, pi);
+    log.info("cpp complex [{:>8.2f}] {:s}={:#06x}", pi, name, complex_id);
 }
 
 static void log_logger_wrapper_cases(void)
@@ -255,7 +233,6 @@ static void log_logger_wrapper_cases(void)
     on9log::Logger log("demo");
 
     const char *name = "on9log";
-    const char *null_string = NULL;
     unsigned value = 42u;
     unsigned hex_value = 0xabadu;
     unsigned long long u64_value = 0x1122334455667788ull;
@@ -267,16 +244,16 @@ static void log_logger_wrapper_cases(void)
     ON9_LOGI(TAG,
              "---- on9log::Logger wrapper demo: 4 call forms, same message ----");
 
-    log.info(ON9FMT("wrapper ON9FMT plain overload value={} name={}"), value, name);
+    log.info("wrapper plain literal value={} name={}", value, name);
     log.info(ON9FMT("wrapper ON9FMT form value={} name={}"), value, name);
     log.info<"wrapper NTTP form value={} name={}">(value, name);
     log.info("wrapper UDL form value={} name={}"_on9fmt, value, name);
 
     ON9_LOGI(TAG,
-             "---- wrapper: each level, INFO default wire type + null str ----");
+             "---- wrapper: each level using fmt syntax ----");
     log.error(ON9FMT("wrapper level error value={}"), value);
     log.warn(ON9FMT("wrapper level warn name={}"), name);
-    log.info(ON9FMT("wrapper level info ptr={} null={}"), pointer_arg, null_string);
+    log.info(ON9FMT("wrapper level info ptr={}"), pointer_arg);
     log.debug(ON9FMT("wrapper level debug value={} hex={:x}"), value, hex_value);
     log.verbose(ON9FMT("wrapper level verbose u64={} signed_64={}"), u64_value, signed_64);
 
@@ -285,14 +262,12 @@ static void log_logger_wrapper_cases(void)
     log.log<ON9_LOG_LEVEL_WARN, "wrapper log<WARN,...> form value={}">(value);
 
     ON9_LOGI(TAG, "---- wrapper: printf-style on the C++ wrapper ----");
-    log.warn(ON9FMT("wrapper printf style value=%d hex=%08x"), value, hex_value);
+    log.warn("wrapper printf style value=%u hex=%08x", value, hex_value);
+    log.info("wrapper printf strings name=%s completion=100%%", name);
 
-    ON9_LOGI(TAG, "---- wrapper: mixed C and C++ string dispatches to printf ----");
-    log.info(ON9FMT("wrapper mixed payload={} status=%d so {{}} stays literal"), value);
-
-    ON9_LOGI(TAG, "---- wrapper: float needs explicit :f, wire u64 ambiguity ----");
-    log.info(ON9FMT("wrapper float good {:.2f} bad_default={}"), pi, pi);
-    log.info(ON9FMT("wrapper u64 default renders raw bit pattern unsigned: {}"), u64_value);
+    ON9_LOGI(TAG, "---- wrapper: fmt-style remains separate from printf-style ----");
+    log.info("wrapper fmt float fixed={:.2f} default={}", pi, pi);
+    log.info("wrapper fmt u64={} signed_64={}", u64_value, signed_64);
 
     ON9_LOGI(TAG, "---- wrapper: buffer dump pointer+len form ----");
     log.buffer_info(pointer_target, sizeof(pointer_target));
@@ -408,13 +383,22 @@ static void worker_task(void *arg)
 
 extern "C" void app_main(void)
 {
+    on9log_err_t on9_err = on9log_init();
+    if (on9_err != ON9LOG_OK) {
+        printf("on9log_init failed: %d\n", (int)on9_err);
+        return;
+    }
+
     esp_err_t err = on9log_esp_vfs_init();
     if (err != ESP_OK) {
         printf("on9log_esp_vfs_init failed: 0x%x\n", (unsigned)err);
         return;
     }
 
-    ON9_LOGI(TAG, "on9log demo start local_level=%d", ON9_LOG_LOCAL_LEVEL);
+    ON9_LOGI(TAG,
+             "on9log demo start local_level=%d plain_text=%d",
+             ON9_LOG_LOCAL_LEVEL,
+             ON9LOG_PLAIN_TEXT);
     log_chip_info();
     log_format_cases();
     log_string_slice_cases();
