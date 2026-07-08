@@ -143,7 +143,7 @@ static void log_format_cases(void)
 
 static void log_string_slice_cases(void)
 {
-    on9log::Logger log("demo");
+    Logger log("demo", on9log::Logger::Flag::SHOWTOPIC | on9log::Logger::Flag::SHOWLEVEL | on9log::Logger::Flag::SHOWTIMESTAMP);
 
     const char c_text[] = "slice!";
     const char non_nul_text[] = {'s', 'l', 'i', 'c', 'e', '!'};
@@ -175,7 +175,7 @@ static void log_string_slice_cases(void)
 
 static void log_cpp_format_cases(void)
 {
-    on9log::Logger log("demo");
+    Logger log("demo");
     const char *name = "on9log";
     const uint8_t pointer_target[] = {0xa5, 0xc0, 0xdb, 0x00};
     const uint8_t *pointer_arg = pointer_target;
@@ -230,7 +230,7 @@ static void log_logger_wrapper_cases(void)
 {
     using namespace on9log::literals;
 
-    on9log::Logger log("demo");
+    Logger log("demo");
 
     const char *name = "on9log";
     unsigned value = 42u;
@@ -242,7 +242,7 @@ static void log_logger_wrapper_cases(void)
     const uint8_t *pointer_arg = pointer_target;
 
     ON9_LOGI(TAG,
-             "---- on9log::Logger wrapper demo: 4 call forms, same message ----");
+             "---- Logger wrapper demo: 4 call forms, same message ----");
 
     log.info("wrapper plain literal value={} name={}", value, name);
     log.info(ON9FMT("wrapper ON9FMT form value={} name={}"), value, name);
@@ -343,12 +343,12 @@ static void log_filter_cases(void)
     emit_filter_demo_lines("worker", "global=WARN");
 
     ON9_LOGW(TAG, "---- filter: per-tag worker -> VERBOSE via C++ static wrapper ----");
-    on9log::Logger::set_tag_level("worker", ON9_LOG_LEVEL_VERBOSE);
+    Logger::set_tag_level("worker", ON9_LOG_LEVEL_VERBOSE);
     emit_filter_demo_lines("demo", "per-tag worker=VERBOSE");
     emit_filter_demo_lines("worker", "per-tag worker=VERBOSE");
 
     ON9_LOGW(TAG, "---- filter: clear worker override via C++ static wrapper ----");
-    on9log::Logger::clear_tag_level("worker");
+    Logger::clear_tag_level("worker");
     emit_filter_demo_lines("demo", "cleared worker");
     emit_filter_demo_lines("worker", "cleared worker");
 
@@ -357,7 +357,7 @@ static void log_filter_cases(void)
     on9log_set_level(ON9_LOG_LEVEL_NONE);
     emit_filter_demo_lines("demo", "global=NONE");
     ON9_LOGE(TAG, "this error line must be suppressed under NONE");
-    on9log::Logger::set_level(ON9_LOG_LEVEL_VERBOSE);
+    Logger::set_level(ON9_LOG_LEVEL_VERBOSE);
     ON9_LOGI(TAG, "---- filter: global VERBOSE restored (NONE block above showed nothing) ----");
     emit_filter_demo_lines("demo", "restored");
     emit_filter_demo_lines("worker", "restored");
