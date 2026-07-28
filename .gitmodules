@@ -1,3 +1,6 @@
 [submodule "components/on9log"]
 	path = components/on9log
 	url = https://github.com/huming2207/on9log
+[submodule "components/on9ringstore"]
+	path = components/on9ringstore
+	url = https://github.com/huming2207/on9ringstore.git
