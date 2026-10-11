@@ -13,12 +13,14 @@
 #include "esp_err.h"
 #include "esp_flash.h"
 #include "esp_log.h"
+#include "esp_random.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "on9log.h"
 #include "on9log.hpp"
 #include "on9log_esp_vfs.h"
+#include "on9log_port.h"
 #include "sdkconfig.h"
 
 static const char *TAG = "demo";
@@ -394,6 +396,10 @@ extern "C" void app_main(void)
         printf("on9log_esp_vfs_init failed: 0x%x\n", (unsigned)err);
         return;
     }
+
+    // First packet after the sink exists: the host restarts gap tracking and
+    // checks its ELF against this firmware's image ID before decoding logs.
+    on9log_emit_boot(esp_random(), on9log_port_reset_reason());
 
     ON9_LOGI(TAG,
              "on9log demo start local_level=%d plain_text=%d",
